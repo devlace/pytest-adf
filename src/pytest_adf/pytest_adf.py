@@ -72,14 +72,16 @@ def adf_config(request):
     DEFAULT_AZ_DATAFACTORY_POLL_INTERVAL_SEC = 5
     config = {
         "AZ_SERVICE_PRINCIPAL_ID": _default(r.AZ_SERVICE_PRINCIPAL_ID, os.getenv("AZ_SERVICE_PRINCIPAL_ID")),
-        "AZ_SERVICE_PRINCIPAL_SECRET": _default(r.AZ_SERVICE_PRINCIPAL_SECRET, os.getenv("AZ_SERVICE_PRINCIPAL_SECRET")),
-        "AZ_SERVICE_PRINCIPAL_TENANT_ID": _default(r.AZ_SERVICE_PRINCIPAL_TENANT_ID, os.getenv("AZ_SERVICE_PRINCIPAL_TENANT_ID")),
+        "AZ_SERVICE_PRINCIPAL_SECRET": _default(r.AZ_SERVICE_PRINCIPAL_SECRET,
+                                                os.getenv("AZ_SERVICE_PRINCIPAL_SECRET")),
+        "AZ_SERVICE_PRINCIPAL_TENANT_ID": _default(r.AZ_SERVICE_PRINCIPAL_TENANT_ID,
+                                                   os.getenv("AZ_SERVICE_PRINCIPAL_TENANT_ID")),
         "AZ_SUBSCRIPTION_ID": _default(r.AZ_SUBSCRIPTION_ID, os.getenv("AZ_SUBSCRIPTION_ID")),
         "AZ_RESOURCE_GROUP_NAME": _default(r.AZ_RESOURCE_GROUP_NAME, os.getenv("AZ_RESOURCE_GROUP_NAME")),
         "AZ_DATAFACTORY_NAME": _default(r.AZ_DATAFACTORY_NAME, os.getenv("AZ_DATAFACTORY_NAME")),
         "AZ_DATAFACTORY_POLL_INTERVAL_SEC": int(_default(r.AZ_DATAFACTORY_POLL_INTERVAL_SEC,
                                                          os.getenv("AZ_DATAFACTORY_POLL_INTERVAL_SEC",
-                                                         DEFAULT_AZ_DATAFACTORY_POLL_INTERVAL_SEC)))
+                                                                   DEFAULT_AZ_DATAFACTORY_POLL_INTERVAL_SEC)))
     }
     # Ensure all required config is set.
     for config_key, value in config.items():
@@ -98,7 +100,6 @@ def adf_client(adf_config):
     return DataFactoryManagementClient(credentials, adf_config["AZ_SUBSCRIPTION_ID"])
 
 
-
 @pytest.fixture(scope="session")
 def adf_pipeline_run(adf_client, adf_config):
     """Factory function for triggering an ADF Pipeline run given run_inputs, and polls for results."""
@@ -112,10 +113,10 @@ def adf_pipeline_run(adf_client, adf_config):
             and not rerun
             and pipeline_name in cached_pipeline_runs.keys()
                 and cached_run_name in cached_pipeline_runs[pipeline_name].keys()):
-            LOG.info("""Previously executed cached pipeline run found for pipeline: {pipeline} 
+            LOG.info("""Previously executed cached pipeline run found for pipeline: {pipeline}
                      with run_name: {run_name}""".format(pipeline=pipeline_name, run_name=cached_run_name))
             return cached_pipeline_runs[pipeline_name][cached_run_name]
-        
+
         # Trigger an ADF run
         az_resource_group = adf_config["AZURE_RESOURCE_GROUP_NAME"]
         adf_name = adf_config["AZURE_DATAFACTORY_NAME"]
@@ -123,7 +124,7 @@ def adf_pipeline_run(adf_client, adf_config):
             az_resource_group, adf_name, pipeline_name, parameters=run_inputs)
         pipeline_run = _poll_adf_until(adf_client, az_resource_group, adf_name, run_response.run_id,
                                        poll_interval=int(adf_config["AZURE_DATAFACTORY_POLL_INTERVAL"]))
-        
+
         # Store run in cache, if run_name is specified
         if cached_run_name != "":
             LOG.info("Caching pipeline: {pipeline} with run_name: {run_name}".format(

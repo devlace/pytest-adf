@@ -37,19 +37,13 @@ RUN mkdir -p ${PIP_TARGET} \
     && echo "$SNIPPET" | tee -a /root/.bashrc >> /home/vscode/.bashrc \
     && echo "$SNIPPET" | tee -a /root/.zshrc >> /home/vscode/.zshrc
 
-# Install legacy python
-# RUN apt-get update && apt-get -y install software-properties-common \
-#     && sudo apt-add-repository -r ppa:armagetronad-dev/ppa
-# RUN apt-get -yqq install \
-#     python3.4 python3.5 python3.6
-
-# install pypy versions
-# ADD pypy-2.5.0-linux64.tar.bz2 /opt/
-# ADD pypy3.6-v7.3.1-linux64.tar.bz2 /opt/
-# RUN mkdir -p /opt
-# ADD https://bitbucket.org/pypy/pypy/downloads/pypy3.6-v7.3.1-linux64.tar.bz2 /tmp/
-# RUN cd /opt && tar -xf /tmp/pypy3.6-v7.3.1-linux64.tar.bz2
-RUN sudo apt update && sudo apt -y install pypy
+# TODO: This PPA does not support the version of Ubuntu this container is based on
+# RUN apt-get update \
+#     && apt-get -y install software-properties-common \
+#     && add-apt-repository -y ppa:pypy/ppa \
+#     && add-apt-repository -y ppa:deadsnakes/ppa \
+#     && sudo apt -yq update \
+#     && sudo apt -y install pypy3 python3.5
 
 # Clean up
 RUN apt-get autoremove -y \

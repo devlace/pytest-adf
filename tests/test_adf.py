@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 
 def test_adf_config_fixture(testdir):
     """Make sure that pytest accepts our fixture."""
@@ -12,8 +10,8 @@ def test_adf_config_fixture(testdir):
 
         @pytest.fixture(autouse=True)
         def env_setup(monkeypatch):
-            monkeypatch.setenv("AZ_DATAFACTORY_NAME", "adf_wrong")  # Should be set, as this is not set in cmdline args
-            monkeypatch.setenv("AZ_DATAFACTORY_POLL_INTERVAL_SEC", "10")  # Should be set, as this is not set in cmdline args
+            monkeypatch.setenv("AZ_DATAFACTORY_NAME", "adf_wrong")  # Should be NOT be set, -- set in cmdline args
+            monkeypatch.setenv("AZ_DATAFACTORY_POLL_INTERVAL_SEC", "10")  # Should be set, -- not set in cmdline args
 
         def test_sth(env_setup, adf_config):
             assert adf_config["AZ_SERVICE_PRINCIPAL_ID"] == "sp_id"
