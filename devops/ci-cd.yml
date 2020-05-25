@@ -52,7 +52,7 @@ stages:
         artifactFeeds: '$(azureArtifactsFeedName)'
       displayName: 'Authenticate to Azure Artifacts'
 
-    - script: 'twine upload -r $(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist'
+    - script: 'twine upload -r $(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist/*'
       displayName: 'Upload to Azure Artifacts'
 
 # - stage: deploy_to_pypi
