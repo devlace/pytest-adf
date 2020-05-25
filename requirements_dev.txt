@@ -7,3 +7,4 @@ mkdocs
 autopep8
 flake8
 coverage
+twine
