@@ -3,17 +3,32 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
+pr:
 - master
+- releases/*
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+- job:
+  pool:
+    vmImage: 'Ubuntu-18.04'
+  strategy:
+    matrix:
+      Python27:
+        pythonVersion: '2.7'
+      Python35:
+        pythonVersion: '3.5'
+      Python36:
+        pythonVersion: '3.6'
+      Python37:
+        pythonVersion: '3.7'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(pythonVersion)'
+    inputs:
+      versionSpec: '$(pythonVersion)'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+  - script: pip install tox
+    displayName: 'Install Tox'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - script: tox -e py
+    displayName: 'Run Tox'
