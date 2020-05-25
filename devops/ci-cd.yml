@@ -19,7 +19,7 @@ stages:
     displayName: 'Build and Publish Python Packages'
     variables:
       pythonPackageWorkingDir: '.'
-      azureArtifactsFeedName: DataDevOpsFeed
+      azureArtifactsFeedName: pytest-adf
     pool:
       vmImage: 'Ubuntu-18.04'
     steps:
