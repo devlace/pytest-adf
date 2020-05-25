@@ -20,6 +20,7 @@ stages:
     variables:
       pythonPackageWorkingDir: '.'
       azureArtifactsFeedName: pytest-adf
+      azureArtifactsEndpoint: https://pkgs.dev.azure.com/devlacepub/pytest-adf/_packaging/pytest-adf/pypi/upload
     pool:
       vmImage: 'Ubuntu-18.04'
     steps:
@@ -52,7 +53,7 @@ stages:
         artifactFeeds: '$(azureArtifactsFeedName)'
       displayName: 'Authenticate to Azure Artifacts'
 
-    - script: 'twine upload -r $(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist/*'
+    - script: 'twine upload -r $(azureArtifactsEndpoint) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist/*'
       displayName: 'Upload to Azure Artifacts'
 
 # - stage: deploy_to_pypi
