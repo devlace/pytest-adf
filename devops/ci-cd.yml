@@ -19,8 +19,8 @@ stages:
     displayName: 'Build and Publish Python Packages'
     variables:
       pythonPackageWorkingDir: '.'
-      azureArtifactsFeedName: pytest-adf/pytest-adf
-      # azureArtifactsEndpoint: https://pkgs.dev.azure.com/devlacepub/pytest-adf/_packaging/pytest-adf/pypi/upload
+      azureArtifactsProjectName: pytest-adf
+      azureArtifactsFeedName: pytest-adf-feed
     pool:
       vmImage: 'Ubuntu-18.04'
     steps:
@@ -50,7 +50,7 @@ stages:
 
     - task: TwineAuthenticate@0
       inputs:
-        artifactFeeds: '$(azureArtifactsFeedName)'
+        artifactFeeds: '$(azureArtifactsProjectName)/$(azureArtifactsFeedName)'
       displayName: 'Authenticate to Azure Artifacts'
 
     - script: 'twine upload -r $(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist/*'
