@@ -19,6 +19,7 @@ stages:
     displayName: 'Build and Publish Python Packages'
     variables:
       pythonPackageWorkingDir: '.'
+      azureArtifactsFeedName: DataDevOpsFeed
     pool:
       vmImage: 'Ubuntu-18.04'
     steps:
@@ -45,3 +46,26 @@ stages:
         targetPath: '$(pythonPackageWorkingDir)/dist'
         artifact: 'dist'
         publishLocation: 'pipeline'
+
+    - task: TwineAuthenticate@0
+      inputs:
+        artifactFeeds: '$(azureArtifactsFeedName)'
+      displayName: 'Authenticate to Azure Artifacts'
+
+    - script: 'twine upload -r $(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist'
+      displayName: 'Upload to Azure Artifacts'
+
+# - stage: deploy_to_pypi
+#   displayName: 'Deploy to PYPI'
+#   jobs:
+#   - deployment: deploy_to_pypi
+#     displayName: 'Deploy to PYPI'
+#     pool:
+#       vmImage: 'Ubuntu-18.04'
+    
+#     environment: 'DEV'
+#     strategy:
+#     runOnce:
+#       deploy:
+#         steps:
+        
