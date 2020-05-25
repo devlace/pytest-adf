@@ -1,0 +1,51 @@
+trigger:
+    branches:
+      include:
+      - master
+      - release/*
+  
+  variables:
+    pythonPackageMajorVersion:  1
+    pythonPackageMinorVersion:  1
+    pythonPackagePatchVersion:  $(Build.BuildId)
+    pythonPackageName: pytest-adf
+    pythonVersion: 3.8
+  
+  stages:
+  - stage: 'Build'
+    displayName: 'Build'
+    jobs:
+    - job: 'build_and_publish_python_packages'
+      displayName: 'Build and Publish Python Packages'
+      variables:
+        pythonPackageWorkingDir: '.'
+      pool:
+        vmImage: 'Ubuntu-18.04'
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(pythonVersion)'
+          addToPath: true
+          architecture: 'x64'
+        displayName: 'Use Python Version: $(pythonVersion)'
+  
+      - script: pip install -r requirements_dev.txt && pip install -r requirements.txt
+        workingDirectory: $(pythonPackageWorkingDir)
+        displayName: 'Install requirements'
+  
+      - script: make lint && make test
+        workingDirectory: $(pythonPackageWorkingDir)
+        displayName: 'Run lint and tests'
+  
+      - script: make dist
+        env:
+          PACKAGE_VERSION: $(PYTHON_PACKAGE_MAJOR_VERSION).$(pythonPackageMinorVersion).$(pythonPackagePatchVersion)
+        workingDirectory: $(pythonPackageWorkingDir)
+        displayName: 'Create wheel package'
+  
+      - task: PublishPipelineArtifact@1
+        displayName: 'Build and Publish Python Dist Artifacts'
+        inputs:
+          targetPath: '$(pythonPackageWorkingDir)/dist'
+          artifact: 'dist'
+          publishLocation: 'pipeline'
