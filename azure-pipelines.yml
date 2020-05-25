@@ -13,14 +13,14 @@ jobs:
     vmImage: 'Ubuntu-18.04'
   strategy:
     matrix:
-      Python27:
-        pythonVersion: '2.7'
       Python35:
         pythonVersion: '3.5'
       Python36:
         pythonVersion: '3.6'
       Python37:
         pythonVersion: '3.7'
+      Python38:
+        pythonVersion: '3.8'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(pythonVersion)'
