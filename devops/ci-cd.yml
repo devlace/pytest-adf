@@ -19,7 +19,7 @@ stages:
     displayName: 'Build and Publish Python Packages'
     variables:
       pythonPackageWorkingDir: '.'
-      azureArtifactsFeedName: pytestadf
+      azureArtifactsFeedName: pytest-adf/pytest-adf
       # azureArtifactsEndpoint: https://pkgs.dev.azure.com/devlacepub/pytest-adf/_packaging/pytest-adf/pypi/upload
     pool:
       vmImage: 'Ubuntu-18.04'
