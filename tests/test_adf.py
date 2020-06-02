@@ -7,13 +7,12 @@ def test_adf_config_fixture(testdir):
     # create a temporary pytest test module
     testdir.makepyfile("""
         import pytest
+        import os
 
-        @pytest.fixture(autouse=True)
-        def env_setup(monkeypatch):
-            monkeypatch.setenv("AZ_DATAFACTORY_NAME", "adf_wrong")  # Should be NOT be set, -- set in cmdline args
-            monkeypatch.setenv("AZ_DATAFACTORY_POLL_INTERVAL_SEC", "10")  # Should be set, -- not set in cmdline args
+        os.environ["AZ_DATAFACTORY_NAME"] = "adf_wrong" # Should be NOT be set, -- set in cmdline args
+        os.environ["AZ_DATAFACTORY_POLL_INTERVAL_SEC"] = "10" # Should be set, -- not set in cmdline args
 
-        def test_sth(env_setup, adf_config):
+        def test_sth(adf_config):
             assert adf_config["AZ_SERVICE_PRINCIPAL_ID"] == "sp_id"
             assert adf_config["AZ_SERVICE_PRINCIPAL_SECRET"] == "sp_pass"
             assert adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"] == "tenant_id"

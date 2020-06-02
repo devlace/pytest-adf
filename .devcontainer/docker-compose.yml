@@ -10,7 +10,7 @@ services:
       context: ../
       dockerfile: .devcontainer/Dockerfile
     ports: 
-    - 5001:5001
+    - 5000:5000
     volumes:
       # Update this to wherever you want VS Code to mount the folder of your project
       - ..:/workspace
