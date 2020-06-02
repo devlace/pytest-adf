@@ -56,12 +56,7 @@ def pytest_addoption(parser):
     )
 
 
-@pytest.fixture
-def bar(request):
-    return request.config.option.dest_foo
-
-
-@pytest.fixture
+@pytest.fixture(scope="session")
 def adf_config(request):
     # Order of importance
     # 1. cmdline args
