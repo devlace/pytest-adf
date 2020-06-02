@@ -7,6 +7,11 @@ pr:
 - master
 - releases/*
 
+variables:
+  pythonPackageMajorVersion:  1
+  pythonPackageMinorVersion:  1
+  pythonPackagePatchVersion:  $(Build.BuildId)
+
 jobs:
 - job:
   pool:
@@ -31,4 +36,6 @@ jobs:
     displayName: 'Install Tox'
 
   - script: tox -e py
+    env:
+      PACKAGE_VERSION: $(pythonPackageMajorVersion).$(pythonPackageMinorVersion).$(pythonPackagePatchVersion)
     displayName: 'Run Tox'
