@@ -5,6 +5,7 @@ import os
 import codecs
 from setuptools import setup, find_packages
 
+version = os.environ['PACKAGE_VERSION']
 
 def read(fname):
     file_path = os.path.join(os.path.dirname(__file__), fname)
@@ -13,7 +14,7 @@ def read(fname):
 
 setup(
     name='pytest-adf',
-    version='0.1.1',
+    version=version,
     author='Lace Lofranco',
     author_email='lace.lofranco@microsoft.com',
     maintainer='Lace Lofranco',
