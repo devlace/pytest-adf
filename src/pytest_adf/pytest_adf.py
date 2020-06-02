@@ -113,12 +113,12 @@ def adf_pipeline_run(adf_client, adf_config):
             return cached_pipeline_runs[pipeline_name][cached_run_name]
 
         # Trigger an ADF run
-        az_resource_group = adf_config["AZURE_RESOURCE_GROUP_NAME"]
-        adf_name = adf_config["AZURE_DATAFACTORY_NAME"]
+        az_resource_group = adf_config["AZ_RESOURCE_GROUP_NAME"]
+        adf_name = adf_config["AZ_DATAFACTORY_NAME"]
         run_response = adf_client.pipelines.create_run(
             az_resource_group, adf_name, pipeline_name, parameters=run_inputs)
         pipeline_run = _poll_adf_until(adf_client, az_resource_group, adf_name, run_response.run_id,
-                                       poll_interval=int(adf_config["AZURE_DATAFACTORY_POLL_INTERVAL"]))
+                                       poll_interval=int(adf_config["AZ_DATAFACTORY_POLL_INTERVAL_SEC"]))
 
         # Store run in cache, if run_name is specified
         if cached_run_name != "":
