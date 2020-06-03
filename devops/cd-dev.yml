@@ -3,12 +3,12 @@ trigger: none
 pr: none
 
 resources:
-    pipelines:
-    - pipeline: cibuild
-      source: ci-build
-      trigger: 
-        branches:
-        - master
+  pipelines:
+  - pipeline: cibuild
+    source: ci-build
+    trigger:
+      branches:
+      - *
 
 stages:
 - stage: 'deploy_to_azure_artifacts'
