@@ -27,5 +27,7 @@ stages:
         artifactFeeds: '$(azureArtifactsProjectName)/$(azureArtifactsFeedName)'
       displayName: 'Authenticate to Azure Artifacts'
 
-    - script: 'twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/cibuild/dist/*'
+    - script: |
+        pip install twine
+        twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/cibuild/dist/*
       displayName: 'Upload to Azure Artifacts'
