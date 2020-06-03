@@ -7,7 +7,7 @@ trigger:
 pr: none
 
 variables:
-  pythonPackageMajorVersion:  1
+  pythonPackageMajorVersion:  0
   pythonPackageMinorVersion:  1
   pythonPackagePatchVersion:  $(Build.BuildId)
   pythonPackageName: pytest-adf
