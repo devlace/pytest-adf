@@ -30,5 +30,5 @@ stages:
     - script: pip install twine
       displayName: 'Install twine'
 
-    - script: 'twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/cibuild/dist/*'
+    - script: 'python -m twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/cibuild/dist/*'
       displayName: 'Upload to Azure Artifacts'

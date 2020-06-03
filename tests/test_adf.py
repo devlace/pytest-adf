@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 
 def test_adf_config_fixture(testdir):
     """Make sure that pytest accepts our fixture."""
@@ -43,41 +45,43 @@ def test_adf_config_fixture(testdir):
     # make sure that that we get a '0' exit code for the testsuite
     assert result.ret == 0
 
-# def test_adf_client_fixture(testdir):
-#     # create a temporary pytest test module
-#     testdir.makeconftest("""
-#         import pytest
-#         from azure.common.credentials import ServicePrincipalCredentials
 
-#         @pytest.fixture(scope="session", autouse=True)
-#         def do_something(session_mocker):
-#             session_mocker.patch(ServicePrincipalCredentials, autospec=True)
-#     """)
-#     testdir.makepyfile("""
-#         import pytest
-#         from azure.mgmt.datafactory import DataFactoryManagementClient
+@pytest.mark.skip("Not yet working.")
+def test_adf_client_fixture(testdir):
+    # create a temporary pytest test module
+    testdir.makeconftest("""
+        import pytest
+        from azure.common.credentials import ServicePrincipalCredentials
 
-#         def test_sth(adf_client):
-#             assert isinstance(adf_client, DataFactoryManagementClient)
-#     """)
-#     # run pytest with the following cmd args
-#     result = testdir.runpytest(
-#         '--sp_id=sp_id',
-#         '--sp_password=sp_pass',
-#         '--sp_tenant_id=tenant_id',
-#         '--sub_id=s_id',
-#         '--sp_tenant_id=tenant_id',
-#         '--sub_id=sub_id',
-#         '--rg_name=rg',
-#         '--adf_name=adf',
-#         '-v'
-#     )
+        @pytest.fixture(scope="session", autouse=True)
+        def do_something(session_mocker):
+            session_mocker.patch(ServicePrincipalCredentials, autospec=True)
+    """)
+    testdir.makepyfile("""
+        import pytest
+        from azure.mgmt.datafactory import DataFactoryManagementClient
 
-#     # fnmatch_lines does an assertion internally
-#     result.stdout.fnmatch_lines([
-#         '*::test_sth PASSED*',
-#     ])
+        def test_sth(adf_client):
+            assert isinstance(adf_client, DataFactoryManagementClient)
+    """)
+    # run pytest with the following cmd args
+    result = testdir.runpytest(
+        '--sp_id=sp_id',
+        '--sp_password=sp_pass',
+        '--sp_tenant_id=tenant_id',
+        '--sub_id=s_id',
+        '--sp_tenant_id=tenant_id',
+        '--sub_id=sub_id',
+        '--rg_name=rg',
+        '--adf_name=adf',
+        '-v'
+    )
 
-#     # make sure that that we get a '0' exit code for the testsuite
-#     assert result.ret == 0
+    # fnmatch_lines does an assertion internally
+    result.stdout.fnmatch_lines([
+        '*::test_sth PASSED*',
+    ])
+
+    # make sure that that we get a '0' exit code for the testsuite
+    assert result.ret == 0
 

@@ -33,9 +33,9 @@ For additional usage information, see [caching pipeline runs](#Caching-pipeline-
 
 ## Configuration
 
-You need to provide pytest-adf with the necessary configuration to connect to your Azure Data Factory. You can provide it via Environment Variables or as pytest command line variables. Command line variables take precendence over Environment Variables.
+You need to provide pytest-adf with the necessary configuration to connect to your Azure Data Factory. You can provide it via Environment Variables or as pytest command line variables. Command line variables take precedence over Environment Variables.
 
-### Environment variables:
+### Environment Variables:
 - **AZ_SERVICE_PRINCIPAL_ID** - Azure AD Service Principal with rights to trigger a run in Data Factory (ei. Data Factory Contributor)
 - **AZ_SERVICE_PRINCIPAL_SECRET** - Password of Service Principal
 - **AZ_SERVICE_PRINCIPAL_TENANT_ID** - Azure AD Tenant ID of Service Principal
@@ -46,7 +46,7 @@ You need to provide pytest-adf with the necessary configuration to connect to yo
 
 For more information on how to create an Azure AD service principal, see [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal).
 
-### Commandline
+### pytest command-line
 Alternatively, you can pass these like so:
 ```
 pytest
