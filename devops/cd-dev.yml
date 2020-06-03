@@ -8,7 +8,7 @@ resources:
     source: ci-build
     trigger:
       branches:
-      - *
+      - master
 
 stages:
 - stage: 'deploy_to_azure_artifacts'
