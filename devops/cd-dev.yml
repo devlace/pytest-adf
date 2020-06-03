@@ -1,0 +1,34 @@
+trigger: none
+
+pr: none
+
+resources:
+  pipelines:
+  - pipeline: cibuild
+    source: ci-build
+    trigger:
+      branches:
+      - master
+
+stages:
+- stage: 'deploy_to_azure_artifacts'
+  displayName: 'Deploy to Azure Artifacts'
+  jobs:
+  - job: 'publish_to_azure_artifacts'
+    displayName: 'Publish to Azure Artifacts'
+    variables:
+      azureArtifactsProjectName: pytest-adf
+      azureArtifactsFeedName: pytest-adf-feed
+    pool:
+      vmImage: 'Ubuntu-18.04'
+    steps:
+    - task: TwineAuthenticate@0
+      inputs:
+        artifactFeeds: '$(azureArtifactsProjectName)/$(azureArtifactsFeedName)'
+      displayName: 'Authenticate to Azure Artifacts'
+
+    - script: pip install twine
+      displayName: 'Install twine'
+
+    - script: 'python -m twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/cibuild/dist/*'
+      displayName: 'Upload to Azure Artifacts'

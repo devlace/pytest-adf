@@ -1,0 +1,10 @@
+site_name: pytest-adf
+site_description: Pytest plugin for writing Azure Data Factory integration tests
+site_author: Lace Lofranco
+
+theme: readthedocs
+
+repo_url: https://github.com/devlace/pytest-adf
+
+pages:
+- Home: index.md

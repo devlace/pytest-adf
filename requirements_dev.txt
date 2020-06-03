@@ -1,0 +1,11 @@
+pip
+wheel
+tox
+pytest
+pytest-runner
+pytest-mock
+mkdocs
+autopep8
+flake8
+coverage
+twine
