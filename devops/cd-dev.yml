@@ -13,6 +13,7 @@ resources:
 pool:
   vmImage: 'Ubuntu-18.04'
 steps:
+- download: cibuild
 - task: TwineAuthenticate@0
   inputs:
     artifactFeeds: '$(azureArtifactsProjectName)/$(azureArtifactsFeedName)'
