@@ -21,6 +21,6 @@ services:
     
     # Overrides default command so things don't shut down after the process ends - useful for debugging
     command: sleep infinity
-    # env_file:
-    # - ../.env
+    env_file:
+    - ../.env
 

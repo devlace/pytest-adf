@@ -43,41 +43,41 @@ def test_adf_config_fixture(testdir):
     # make sure that that we get a '0' exit code for the testsuite
     assert result.ret == 0
 
+# def test_adf_client_fixture(testdir):
+#     # create a temporary pytest test module
+#     testdir.makeconftest("""
+#         import pytest
+#         from azure.common.credentials import ServicePrincipalCredentials
 
-# def test_help_message(testdir):
-#     result = testdir.runpytest(
-#         '--help',
-#     )
-#     # fnmatch_lines does an assertion internally
-#     result.stdout.fnmatch_lines([
-#         'adf:',
-#         '*--foo=DEST_FOO*Set the value for the fixture "bar".',
-#     ])
-
-
-# def test_hello_ini_setting(testdir):
-#     testdir.makeini("""
-#         [pytest]
-#         HELLO = world
+#         @pytest.fixture(scope="session", autouse=True)
+#         def do_something(session_mocker):
+#             session_mocker.patch(ServicePrincipalCredentials, autospec=True)
 #     """)
-
 #     testdir.makepyfile("""
 #         import pytest
+#         from azure.mgmt.datafactory import DataFactoryManagementClient
 
-#         @pytest.fixture
-#         def hello(request):
-#             return request.config.getini('HELLO')
-
-#         def test_hello_world(hello):
-#             assert hello == 'world'
+#         def test_sth(adf_client):
+#             assert isinstance(adf_client, DataFactoryManagementClient)
 #     """)
-
-#     result = testdir.runpytest('-v')
+#     # run pytest with the following cmd args
+#     result = testdir.runpytest(
+#         '--sp_id=sp_id',
+#         '--sp_password=sp_pass',
+#         '--sp_tenant_id=tenant_id',
+#         '--sub_id=s_id',
+#         '--sp_tenant_id=tenant_id',
+#         '--sub_id=sub_id',
+#         '--rg_name=rg',
+#         '--adf_name=adf',
+#         '-v'
+#     )
 
 #     # fnmatch_lines does an assertion internally
 #     result.stdout.fnmatch_lines([
-#         '*::test_hello_world PASSED*',
+#         '*::test_sth PASSED*',
 #     ])
 
 #     # make sure that that we get a '0' exit code for the testsuite
 #     assert result.ret == 0
+

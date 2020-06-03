@@ -10,14 +10,6 @@ pytest-adf
     :target: https://pypi.org/project/pytest-adf
     :alt: Python versions
 
-.. image:: https://travis-ci.org/devlace/pytest-adf.svg?branch=master
-    :target: https://travis-ci.org/devlace/pytest-adf
-    :alt: See Build Status on Travis CI
-
-.. image:: https://ci.appveyor.com/api/projects/status/github/devlace/pytest-adf?branch=master
-    :target: https://ci.appveyor.com/project/devlace/pytest-adf/branch/master
-    :alt: See Build Status on AppVeyor
-
 Pytest plugin for writing Azure Data Factory integration tests
 
 ----
