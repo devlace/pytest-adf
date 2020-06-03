@@ -1,8 +1,8 @@
 trigger:
-    branches:
-      include:
-      - master
-      - release/*
+  branches:
+    include:
+    - master
+    - release/*
 
 pr: none
 
@@ -49,26 +49,3 @@ stages:
         targetPath: '$(pythonPackageWorkingDir)/dist'
         artifact: 'dist'
         publishLocation: 'pipeline'
-
-    # - task: TwineAuthenticate@0
-    #   inputs:
-    #     artifactFeeds: '$(azureArtifactsProjectName)/$(azureArtifactsFeedName)'
-    #   displayName: 'Authenticate to Azure Artifacts'
-
-    # - script: 'twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(pythonPackageWorkingDir)/dist/*'
-    #   displayName: 'Upload to Azure Artifacts'
-
-# - stage: deploy_to_pypi
-#   displayName: 'Deploy to PYPI'
-#   jobs:
-#   - deployment: deploy_to_pypi
-#     displayName: 'Deploy to PYPI'
-#     pool:
-#       vmImage: 'Ubuntu-18.04'
-    
-#     environment: 'DEV'
-#     strategy:
-#     runOnce:
-#       deploy:
-#         steps:
-        
