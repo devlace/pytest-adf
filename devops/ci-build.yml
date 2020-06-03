@@ -17,8 +17,8 @@ stages:
 - stage: 'Build'
   displayName: 'Build'
   jobs:
-  - job: 'build_and_publish_python_packages'
-    displayName: 'Build and Publish Python Packages'
+  - job: 'build_python_packages'
+    displayName: 'Build Python Packages'
     variables:
       pythonPackageWorkingDir: '.'
       azureArtifactsProjectName: pytest-adf

@@ -4,8 +4,8 @@ pr: none
 
 resources:
     pipelines:
-    - pipeline: ci
-      source: ci
+    - pipeline: cibuild
+      source: ci-build
       trigger: 
         branches:
         - master
@@ -17,7 +17,6 @@ stages:
   - job: 'publish_to_azure_artifacts'
     displayName: 'Publish to Azure Artifacts'
     variables:
-      pythonPackageWorkingDir: '.'
       azureArtifactsProjectName: pytest-adf
       azureArtifactsFeedName: pytest-adf-feed
     pool:
@@ -28,5 +27,5 @@ stages:
         artifactFeeds: '$(azureArtifactsProjectName)/$(azureArtifactsFeedName)'
       displayName: 'Authenticate to Azure Artifacts'
 
-    - script: 'twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/ci/dist/*'
+    - script: 'twine upload -r $(azureArtifactsProjectName)/$(azureArtifactsFeedName) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/cibuild/dist/*'
       displayName: 'Upload to Azure Artifacts'
