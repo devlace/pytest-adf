@@ -1,0 +1,41 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pr:
+- master
+- releases/*
+
+variables:
+  pythonPackageMajorVersion:  1
+  pythonPackageMinorVersion:  1
+  pythonPackagePatchVersion:  $(Build.BuildId)
+
+jobs:
+- job:
+  pool:
+    vmImage: 'Ubuntu-18.04'
+  strategy:
+    matrix:
+      Python35:
+        pythonVersion: '3.5'
+      Python36:
+        pythonVersion: '3.6'
+      Python37:
+        pythonVersion: '3.7'
+      Python38:
+        pythonVersion: '3.8'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(pythonVersion)'
+    inputs:
+      versionSpec: '$(pythonVersion)'
+
+  - script: pip install tox
+    displayName: 'Install Tox'
+
+  - script: tox -e py
+    env:
+      PACKAGE_VERSION: $(pythonPackageMajorVersion).$(pythonPackageMinorVersion).$(pythonPackagePatchVersion)
+    displayName: 'Run Tox'
