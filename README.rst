@@ -41,4 +41,4 @@ pipeline run till completion\* before returning.
 \*Pipeline run completion is defined by the following status:
 "Succeeded", "TimedOut", "Failed", "Cancelled".
 
-For more information see `Github page <https://github.com/devlace/pytest-adf>`_.
+For more information see `Github page <https://aka.ms/pytest-adf>`_.
