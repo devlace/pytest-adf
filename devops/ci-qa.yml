@@ -5,7 +5,7 @@
 
 pr:
 - master
-- releases/*
+- release/*
 
 variables:
   pythonPackageMajorVersion:  1

@@ -25,9 +25,9 @@ def test_pipeline_succeeded(adf_pipeline_run):
     this_run = adf_pipeline_run("my_pipeline", run_inputs={})
     assert this_run.status == "Succeeded"
 ```
-The `adf_pipeline_run` fixture provides a factory function that triggers a pipeline run when called. It will then block and poll the pipeline run till completion* before returning.
+The `adf_pipeline_run` fixture provides a factory function that triggers a pipeline run when called. It will then block and poll the pipeline run till completion* before returning. Pipeline run completion is defined by the following status: "Succeeded", "TimedOut", "Failed", "Cancelled".
 
-*Pipeline run completion is defined by the following status: "Succeeded", "TimedOut", "Failed", "Cancelled".
+For an example of how to use this in an overall Modern Data Warehouse solution as part of an automated Azure DevOps Release Pipeline, see [here](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/master/e2e_samples/parking_sensors/tests/integrationtests) and [here](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/master/e2e_samples/parking_sensors/devops/templates/jobs/integration-tests-job.yml). This is part of a [larger demo solution](https://github.com/Azure-Samples/modern-data-warehouse-dataops/tree/master/e2e_samples/parking_sensors) showcasing DataOps as applied to the Modern Data Warehouse architecture.
 
 For additional usage information, see [caching pipeline runs](#Caching-pipeline-runs).
 
