@@ -2,3 +2,4 @@ pytest
 azure-mgmt-resource
 azure-mgmt-datafactory
 azure-identity
+msrestazure
