@@ -6,8 +6,11 @@ import time
 import logging
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.datafactory import DataFactoryManagementClient
+from azure.identity import AzureCliCredential
 
 LOG = logging.getLogger(__name__)
+
+OPTIONAL_ARGS = ["AZ_SERVICE_PRINCIPAL_ID", "AZ_SERVICE_PRINCIPAL_SECRET"]
 
 
 def pytest_addoption(parser):
@@ -80,18 +83,21 @@ def adf_config(request):
     }
     # Ensure all required config is set.
     for config_key, value in config.items():
-        if value is None:
-            raise ValueError(
-                "Required config: {config_key} is not set.".format(config_key=config_key))
+        if value is None and config_key not in OPTIONAL_ARGS:
+            raise ValueError("Required config: {config_key} is not set.".format(config_key=config_key))
+
     return config
 
 
 @pytest.fixture(scope="session")
 def adf_client(adf_config):
     """Creates an DataFactoryManagementClient object"""
-    credentials = ServicePrincipalCredentials(client_id=adf_config["AZ_SERVICE_PRINCIPAL_ID"],
-                                              secret=adf_config["AZ_SERVICE_PRINCIPAL_SECRET"],
-                                              tenant=adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"])
+    if adf_config["AZ_SERVICE_PRINCIPAL_ID"] is None:
+        credentials = AzureCliCredential()
+    else:
+        credentials = ServicePrincipalCredentials(client_id=adf_config["AZ_SERVICE_PRINCIPAL_ID"],
+                                                  secret=adf_config["AZ_SERVICE_PRINCIPAL_SECRET"],
+                                                  tenant=adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"])
     return DataFactoryManagementClient(credentials, adf_config["AZ_SUBSCRIPTION_ID"])
 
 
