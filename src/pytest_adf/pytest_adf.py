@@ -4,7 +4,7 @@ import pytest
 import os
 import time
 import logging
-from azure.common.credentials import ServicePrincipalCredentials
+from azure.identity import ClientSecretCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.identity import AzureCliCredential
 
@@ -95,9 +95,9 @@ def adf_client(adf_config):
     if adf_config["AZ_SERVICE_PRINCIPAL_ID"] is None:
         credentials = AzureCliCredential()
     else:
-        credentials = ServicePrincipalCredentials(client_id=adf_config["AZ_SERVICE_PRINCIPAL_ID"],
-                                                  secret=adf_config["AZ_SERVICE_PRINCIPAL_SECRET"],
-                                                  tenant=adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"])
+        credentials = ClientSecretCredential(client_id=adf_config["AZ_SERVICE_PRINCIPAL_ID"],
+                                         client_secret=adf_config["AZ_SERVICE_PRINCIPAL_SECRET"],
+                                         tenant_id=adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"])
     return DataFactoryManagementClient(credentials, adf_config["AZ_SUBSCRIPTION_ID"])
 
 
