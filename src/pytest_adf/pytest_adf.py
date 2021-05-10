@@ -4,9 +4,8 @@ import pytest
 import os
 import time
 import logging
-from azure.identity import ClientSecretCredential
+from azure.identity import ClientSecretCredential, AzureCliCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
-from azure.identity import AzureCliCredential
 
 LOG = logging.getLogger(__name__)
 

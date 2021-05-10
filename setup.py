@@ -27,7 +27,7 @@ setup(
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires='>=3.5',
-    install_requires=['pytest>=3.5.0'],
+    install_requires=['pytest>=3.5.0', 'azure-identity', 'azure-mgmt-datafactory'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Framework :: Pytest',
