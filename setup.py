@@ -23,7 +23,7 @@ setup(
     license='MIT',
     url='https://github.com/devlace/pytest-adf',
     description='Pytest plugin for writing Azure Data Factory integration tests',
-    # long_description=read('README.rst'),
+    long_description=read('README.rst'),
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires='>=3.5',

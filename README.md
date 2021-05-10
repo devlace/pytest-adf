@@ -1,18 +1,22 @@
 
 # pytest-adf
 
-*ALPHA RELEASE*
+This is an *ALPHA RELEASE*
 
 pytest-adf is a [pytest](https://docs.pytest.org/en/stable/) plugin for writing Azure Data Factory integration tests. It is light-wrapper around the [Azure Data Factory Python SDK](https://azure.github.io/azure-sdk-for-python/ref/Data-Factory.html?highlight=datafactory).
 
 [![Build Status](https://dev.azure.com/devlacepub/pytest-adf/_apis/build/status/ci-cd?branchName=master)](https://dev.azure.com/devlacepub/pytest-adf/_build/latest?definitionId=10&branchName=master)
 
 ## Requirements
+
 You will need the following:
+
 - Python 3+
 
 ## Installation
+
 To install pytest-adf:
+
 ```python
 pip install pytest-adf
 ```
@@ -20,11 +24,13 @@ pip install pytest-adf
 ## Usage
 
 Here is a simple usage of the `adf_pipeline_run` fixture.
+
 ```python
 def test_pipeline_succeeded(adf_pipeline_run):
     this_run = adf_pipeline_run("my_pipeline", run_inputs={})
     assert this_run.status == "Succeeded"
 ```
+
 The `adf_pipeline_run` fixture provides a factory function that triggers a pipeline run when called. It will then block and poll the pipeline run till completion* before returning. Pipeline run completion is defined by the following status: "Succeeded", "TimedOut", "Failed", "Cancelled".
 
 For an example of how to use this in an overall Modern Data Warehouse solution as part of an automated Azure DevOps Release Pipeline, see [here](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/master/e2e_samples/parking_sensors/tests/integrationtests) and [here](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/master/e2e_samples/parking_sensors/devops/templates/jobs/integration-tests-job.yml). This is part of a [larger demo solution](https://github.com/Azure-Samples/modern-data-warehouse-dataops/tree/master/e2e_samples/parking_sensors) showcasing DataOps as applied to the Modern Data Warehouse architecture.
@@ -35,7 +41,8 @@ For additional usage information, see [caching pipeline runs](#Caching-pipeline-
 
 You need to provide pytest-adf with the necessary configuration to connect to your Azure Data Factory. You can provide it via Environment Variables or as pytest command line variables. Command line variables take precedence over Environment Variables.
 
-### Environment Variables:
+### Environment Variables
+
 - **AZ_SERVICE_PRINCIPAL_ID** - Azure AD Service Principal with rights to trigger a run in Data Factory (ei. Data Factory Contributor), if not provided the test will use AZ-Cli authentication
 - **AZ_SERVICE_PRINCIPAL_SECRET** - Password of Service Principal
 - **AZ_SERVICE_PRINCIPAL_TENANT_ID** - Azure AD Tenant ID of Service Principal
@@ -47,7 +54,9 @@ You need to provide pytest-adf with the necessary configuration to connect to yo
 For more information on how to create an Azure AD service principal, see [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal).
 
 ### pytest command-line
+
 Alternatively, you can pass these like so:
+
 ```
 pytest
     --sp_id=my_sp_id \
@@ -66,6 +75,7 @@ Because ADF pipelines can be expensive to run, the `adf_pipeline_run` fixture al
 To force a rerun with the same pipeline_name and cached_run_name, use `rerun=True`.
 
 For example:
+
 ```python
 # Call adf_pipeline_run specifying cached_run_name variable.
 this_first_run = adf_pipeline_run(pipeline_name="pipeline_foo", run_inputs={}, cached_run_name="run_bar")
@@ -81,7 +91,6 @@ this_third_run = adf_pipeline_run(pipeline_name="pipeline_foo", run_inputs={}, c
 this_first_run != this_third_run  # False
 
 ```
-
 
 ## Contributing
 
