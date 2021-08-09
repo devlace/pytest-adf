@@ -211,21 +211,20 @@ def _poll_adf_until(adf_client, az_resource_group, adf_name, pipeline_run_id,
 
 
 @pytest.fixture(scope="session")
-def adf_pipeline_trigger_run(adf_client, adf_config):
+def adf_storage_event_triggered_pipeline_run(adf_client, adf_config, blob_service_client):
     """Factory function for triggering an storage-event-triggered ADF Pipeline run by uploading target trigger file to storage account, and polls for results."""
     # Because ADF pipeline can be expensive to execute, you may want to cache pipeline_runs.
     # Cache pipeline runs are identified by pipeline_name and cached_run_name    
     cached_pipeline_runs = {}
     
-    def make_adf_pipeline_trigger_run(pipeline_name, 
-                                      trigger_name,
-                                      blob_service_client, 
-                                      trigger_file_path, 
-                                      container_name, 
-                                      local_trigger_file_path="", 
-                                      blob_event_type=BlobEventType.BLOB_CREATED, 
-                                      cached_run_name: str = "", 
-                                      rerun=False):
+    def make_adf_storage_event_triggered_pipeline_run(pipeline_name, 
+                                                      trigger_name, 
+                                                      trigger_file_path, 
+                                                      container_name, 
+                                                      local_trigger_file_path="", 
+                                                      blob_event_type=BlobEventType.BLOB_CREATED, 
+                                                      cached_run_name: str = "", 
+                                                      rerun=False):
         
         # Check if pipeline run was already previous executed, simply return cached run
         if (cached_run_name != ""
@@ -261,7 +260,7 @@ def adf_pipeline_trigger_run(adf_client, adf_config):
             cached_pipeline_runs[pipeline_name][cached_run_name] = pipeline_run
         return pipeline_run
         
-    return make_adf_pipeline_trigger_run
+    return make_adf_storage_event_triggered_pipeline_run
 
 
 def _upload_event_trigger_file(blob_service_client, trigger_file_path, container_name, local_trigger_file_path):

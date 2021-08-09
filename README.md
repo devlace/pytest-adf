@@ -37,6 +37,48 @@ For an example of how to use this in an overall Modern Data Warehouse solution a
 
 For additional usage information, see [caching pipeline runs](#Caching-pipeline-runs).
 
+For testing storage event triggered pipelines, please use another fixture `adf_storage_event_triggered_pipeline_run`.
+
+```python
+PIPELINE_NAME = "my_blobcreated_event_triggered_pipeline"
+TRIGGER_NAME = "storage_blob_created_event_trigger"
+TRIGGER_FILE_PATH = "event-check/TR_BLOB_CREATED_STORAGE_EVENT.txt"
+CONTAINER_NAME = "event-trigger"
+LOCAL_TRIGGER_FILE_PATH = "./resources/TR_BLOB_CREATED_STORAGE_EVENT.txt"
+
+def test_pipeline_succeeded(adf_storage_event_triggered_pipeline_run):
+    this_run = adf_storage_event_triggered_pipeline_run(PIPELINE_NAME,
+                                                        TRIGGER_NAME,
+                                                        TRIGGER_FILE_PATH,
+                                                        CONTAINER_NAME,
+                                                        LOCAL_TRIGGER_FILE_PATH)
+    
+    assert this_run.status == "Succeeded"
+```
+
+Unlike `adf_pipeline_run` fixture, the `adf_storage_event_triggered_pipeline_run` fixture firstly helps uploading declared storage event trigger file to target container of storage account to trigger the storage-event-triggered pipeline. Then it will block and poll related triggered pipeline run till completion* before returning. Pipeline run completion definition is same as above.
+
+Note that 
+- since pipeline parameters are required to set default values when adding/editing pipeline triggers, therefore there's no *run_inputs* argument for this fixture.
+- `BlobCreated` is the default blob event type, for `BlobDeleted` event trigger pipeline tests, please refer to below sample instead, which just skips the local-trigger-file-path argument and assigns `BlobDeleted` value to *blob_event_type* explicitly, then this fixture will help to delete declared event trigger file from the target container to trigger the specified pipeline run.
+
+
+```python
+PIPELINE_NAME = "my_blobdeleted_event_triggered_pipeline"
+TRIGGER_NAME = "storage_blob_deleted_event_trigger"
+TRIGGER_FILE_PATH = "event-check/TR_BLOB_DELETED_STORAGE_EVENT.txt"
+CONTAINER_NAME = "event-trigger"
+
+def test_pipeline_succeeded(adf_storage_event_triggered_pipeline_run):
+    this_run = adf_storage_event_triggered_pipeline_run(PIPELINE_NAME,
+                                                        TRIGGER_NAME,
+                                                        TRIGGER_FILE_PATH,
+                                                        CONTAINER_NAME,
+                                                        blob_event_type="BlobDeleted")
+    
+    assert this_run.status == "Succeeded"
+```
+
 ## Configuration
 
 You need to provide pytest-adf with the necessary configuration to connect to your Azure Data Factory. You can provide it via Environment Variables or as pytest command line variables. Command line variables take precedence over Environment Variables.
@@ -50,6 +92,8 @@ You need to provide pytest-adf with the necessary configuration to connect to yo
 - **AZ_RESOURCE_GROUP_NAME** - Azure Resource Group name where Azure Data Factory is hosted.
 - **AZ_DATAFACTORY_NAME** - Name of the Azure Data Factory.
 - **AZ_DATAFACTORY_POLL_INTERVAL_SEC** - Optional. Seconds between poll intervals to check for status of the triggered run.
+- **AZ_STORAGE_ACCOUNT_NAME** - Optional. Only required if testing storage event triggered Azure Data Factory pipelines.
+- **AZ_STORAGE_ACCOUNT_KEY** - Optional. Only required if testing storage event triggered Azure Data Factory pipelines.
 
 For more information on how to create an Azure AD service principal, see [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal).
 
@@ -58,6 +102,7 @@ For more information on how to create an Azure AD service principal, see [here](
 Alternatively, you can pass these like so:
 
 ```
+# Last two parameters are required only for testing storage event triggered pipelines
 pytest
     --sp_id=my_sp_id \
     --sp_password=my_sp_pass \
@@ -65,7 +110,9 @@ pytest
     --sub_id=my_s_id \
     --rg_name=my_rg \
     --adf_name=my_adf \
-    --poll_interval=20
+    --poll_interval=20 \
+    --storage_account_name=my_blob_storage_account \
+    --storage_account_key=my_blob_storage_account_key
 ```
 
 ## Caching pipeline runs
