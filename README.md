@@ -60,6 +60,7 @@ Unlike `adf_pipeline_run` fixture, the `adf_storage_event_triggered_pipeline_run
 
 Note that 
 - since pipeline parameters are required to set default values when adding/editing pipeline triggers, therefore there's no *run_inputs* argument for this fixture.
+- since this fixture also helps to upload/delete event trigger file to/from storage account, we need additional storage account related environment variables, more details please refers to below *Environment Variables* section.
 - `BlobCreated` is the default blob event type, for `BlobDeleted` event trigger pipeline tests, please refer to below sample instead, which just skips the local-trigger-file-path argument and assigns `BlobDeleted` value to *blob_event_type* explicitly, then this fixture will help to delete declared event trigger file from the target container to trigger the specified pipeline run.
 
 
