@@ -238,19 +238,27 @@ def adf_storage_event_triggered_pipeline_run(adf_client, adf_config, blob_servic
         az_resource_group = adf_config["AZ_RESOURCE_GROUP_NAME"]
         adf_name = adf_config["AZ_DATAFACTORY_NAME"]
         
+        # Upload/delete event trigger file to/from target storage account, depends on given blob event type
         if blob_event_type == BlobEventType.BLOB_CREATED:
             blob_properties = _upload_event_trigger_file(blob_service_client, trigger_file_path, container_name, local_trigger_file_path)
         elif blob_event_type == BlobEventType.BLOB_DELETED:
             blob_properties = _delete_event_trigger_file(blob_service_client, trigger_file_path, container_name)
             
-        pipeline_run = _poll_adf_by_trigger_name_until(adf_client, 
-                                        az_resource_group, 
-                                        adf_name, 
-                                        pipeline_name, 
-                                        trigger_name, 
-                                        blob_event_type, 
-                                        blob_properties["last_modified"], 
-                                        blob_properties["etag"])
+        # Fetch triggered pipeline run id from trigger run
+        triggered_pipeline_run_id = _get_triggered_pipeline_run_id(adf_client, 
+                                                                   az_resource_group, 
+                                                                   adf_name, 
+                                                                   pipeline_name, 
+                                                                   trigger_name, 
+                                                                   blob_event_type, 
+                                                                   blob_properties["last_modified"], 
+                                                                   blob_properties["etag"])
+        
+        pipeline_run = _poll_adf_until(adf_client, 
+                                       az_resource_group, 
+                                       adf_name, 
+                                       triggered_pipeline_run_id, 
+                                       poll_interval=int(adf_config["AZ_DATAFACTORY_POLL_INTERVAL_SEC"]))
         
         # Store run in cache, if run_name is specified
         if cached_run_name != "":
@@ -315,40 +323,6 @@ def _delete_event_trigger_file(blob_service_client, trigger_file_path, container
     }
     
     return blob_properties
-
-
-def _poll_adf_by_trigger_name_until(adf_client, az_resource_group, adf_name, pipeline_name, trigger_name, blob_event_type, trigger_file_last_modified_time, trigger_file_etag,
-                    until_status=["Succeeded", "TimedOut", "Failed", "Cancelled"], poll_interval=5):
-    """Helper function that polls the triggered ADF pipeline until specific status is achieved.
-    Warning! may continue polling indefinitely if until_status is not set correctly.
-
-    Args:
-        adf_client (DataFactoryManagementClient): Azure Data Factory Management Client
-        az_resource_group (str): Name of Azure Resource Group
-        adf_name: Name of Azure Data Factory (ADF)
-        trigger_name: Name of configured pipeline trigger
-        trigger_file_last_modified_time: Last modified time of target event trigger file
-        trigger_file_etag: Latest eTag of target event trigger file
-        until_status (list[str], optional): List of ADF pipeline run status that will trigger end of polling.
-            Defaults to ["Succeeded", "TimedOut", "Failed", "Cancelled"]
-        poll_interval (int, optional): Poll interval in seconds. Defaults to 5.
-
-    Returns:
-        PipelineRun
-    """
-    
-    triggered_pipeline_run_id = _get_triggered_pipeline_run_id(adf_client, az_resource_group, adf_name, pipeline_name, trigger_name, blob_event_type, trigger_file_last_modified_time, trigger_file_etag)
-    
-    pipeline_run_status = ""
-    while (pipeline_run_status not in until_status):
-        LOG.info("Polling pipeline run with trigger name {}".format(trigger_name))
-        pipeline_run = adf_client.pipeline_runs.get(az_resource_group,
-                                                    adf_name,
-                                                    triggered_pipeline_run_id)
-        pipeline_run_status = pipeline_run.status  # InProgress, Succeeded, Queued, TimedOut, Failed, Cancelled
-            
-        time.sleep(poll_interval)
-    return pipeline_run
 
 
 def _get_triggered_pipeline_run_id(adf_client, az_resource_group, adf_name, pipeline_name, trigger_name, blob_event_type, trigger_file_last_modified_time, trigger_file_etag, poll_interval=5):
