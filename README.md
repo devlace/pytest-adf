@@ -37,7 +37,19 @@ For an example of how to use this in an overall Modern Data Warehouse solution a
 
 For additional usage information, see [caching pipeline runs](#Caching-pipeline-runs).
 
+### Testing Storage Event Triggered Pipelines
 For testing storage event triggered pipelines, please use another fixture `adf_storage_event_triggered_pipeline_run`.
+
+**Storage Event: BlobCreated**
+
+For testing blob created event triggered pipelines, unlike `adf_pipeline_run` fixture, below extra arguments are required.
+- trigger name, the configured trigger of the test target pipeline
+- trigger file path, where to store the event trigger file in container
+- storage account container name, together with trigger file path, the fixture knows where to upload the event trigger file
+- local trigger file path, tells the fixture which even trigger file to upload
+- blob event type, `BlobCreated` is the default value
+
+The fixture firstly helps uploading declared storage event trigger file to target container of storage account to trigger the storage-event-triggered pipeline. Then it will block and poll related triggered pipeline run till completion* before returning. Pipeline run completion definition is same as above.
 
 ```python
 PIPELINE_NAME = "my_blobcreated_event_triggered_pipeline"
@@ -51,19 +63,15 @@ def test_pipeline_succeeded(adf_storage_event_triggered_pipeline_run):
                                                         TRIGGER_NAME,
                                                         TRIGGER_FILE_PATH,
                                                         CONTAINER_NAME,
-                                                        LOCAL_TRIGGER_FILE_PATH)
+                                                        LOCAL_TRIGGER_FILE_PATH,
+                                                        blob_event_type="BlobCreated") # Default value
     
     assert this_run.status == "Succeeded"
 ```
 
-Unlike `adf_pipeline_run` fixture, the `adf_storage_event_triggered_pipeline_run` fixture firstly helps uploading declared storage event trigger file to target container of storage account to trigger the storage-event-triggered pipeline. Then it will block and poll related triggered pipeline run till completion* before returning. Pipeline run completion definition is same as above.
+**Storage Event: BlobDeleted**
 
-Note that 
-- since pipeline parameters are required to set default values when adding/editing pipeline triggers, therefore there's no *run_inputs* argument for this fixture.
-- since this fixture also helps to upload/delete event trigger file to/from storage account, we need additional storage account related environment variables, more details please refers to below *Environment Variables* section.
-- please provide the target event trigger file as test resources when testing `BlobCreated` event trigger pipelines.
-- `BlobCreated` is the default blob event type, for `BlobDeleted` event trigger pipeline tests, please refer to below sample instead, which just skips the local-trigger-file-path argument and assigns `BlobDeleted` value to *blob_event_type* explicitly, then this fixture will help to delete declared event trigger file from the target container to trigger the specified pipeline run.
-
+For testing blob deleted event triggered pipelines, please refer to below sample, which just skips the local-trigger-file-path argument and assigns `BlobDeleted` value to *blob_event_type* explicitly, then the fixture will help to delete declared event trigger file from the target container to trigger the specified pipeline run.
 
 ```python
 PIPELINE_NAME = "my_blobdeleted_event_triggered_pipeline"
@@ -80,6 +88,13 @@ def test_pipeline_succeeded(adf_storage_event_triggered_pipeline_run):
     
     assert this_run.status == "Succeeded"
 ```
+
+Note that 
+- since pipeline parameters are required to set default values when adding/editing pipeline triggers, therefore there's no *run_inputs* argument for this fixture.
+- since this fixture also helps to upload/delete event trigger file to/from storage account, we need additional storage account related environment variables, more details please refers to below *Environment Variables* section.
+- please also provide the target event trigger file as test resources when testing `BlobCreated` event trigger pipelines.
+- this fixture also supports caching pipeline runs, just append those two required arguments to enable it, for more details, please see [caching pipeline runs](#Caching-pipeline-runs).
+
 
 ## Configuration
 
