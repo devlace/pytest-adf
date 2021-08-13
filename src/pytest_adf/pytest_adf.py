@@ -22,9 +22,20 @@ from azure.storage.blob import BlobServiceClient
 
 LOG = logging.getLogger(__name__)
 
-OPTIONAL_ARGS = ["AZ_SERVICE_PRINCIPAL_ID", "AZ_SERVICE_PRINCIPAL_SECRET", "AZ_STORAGE_ACCOUNT_NAME", "AZ_STORAGE_ACCOUNT_KEY"]
+OPTIONAL_ARGS = ["AZ_SERVICE_PRINCIPAL_ID",
+                 "AZ_SERVICE_PRINCIPAL_SECRET",
+                 "AZ_STORAGE_ACCOUNT_NAME",
+                 "AZ_STORAGE_ACCOUNT_KEY"]
 OPTIONAL_STORAGE_ACCOUNT_ARGS = ["AZ_STORAGE_ACCOUNT_NAME", "AZ_STORAGE_ACCOUNT_KEY"]
+
+# Determines the maximum amount of time pytest-adf will look for the triggered pipeline run
+# within the FETCHING_TRIGGER_RUNS_MAX_TIME_IN_SECONDS
 FETCHING_TRIGGER_RUNS_MAX_TIME_IN_SECONDS = 180
+
+# Determines the ADF query time range to search for the corresponding trigger ADF pipeline
+# starting from when the blob file is uploaded/deleted.
+# For example, if file is uploaded/deleted at 01:00, this will search for the trigger-runs
+# between 01:00 and 01:03.
 FETCHING_TRIGGER_RUNS_TIME_RANGE_IN_MINUTES = 3
 
 
@@ -125,8 +136,8 @@ def adf_client(adf_config):
         credentials = AzureCliCredential()
     else:
         credentials = ClientSecretCredential(client_id=adf_config["AZ_SERVICE_PRINCIPAL_ID"],
-                                         client_secret=adf_config["AZ_SERVICE_PRINCIPAL_SECRET"],
-                                         tenant_id=adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"])
+                                             client_secret=adf_config["AZ_SERVICE_PRINCIPAL_SECRET"],
+                                             tenant_id=adf_config["AZ_SERVICE_PRINCIPAL_TENANT_ID"])
     return DataFactoryManagementClient(credentials, adf_config["AZ_SUBSCRIPTION_ID"])
 
 
@@ -135,8 +146,9 @@ def blob_service_client(adf_config):
     """Creates an BlobServiceClient object"""
     for arg in OPTIONAL_STORAGE_ACCOUNT_ARGS:
         if adf_config[arg] is None or adf_config[arg].isspace():
-            raise ValueError("Required config for testing storage-event-triggered ADF pipelines: {} is not set properly.".format(arg))
-    
+            raise ValueError("Required config for testing storage-event-triggered "
+                             "ADF pipelines: {} is not set properly.".format(arg))
+
     account_name = adf_config["AZ_STORAGE_ACCOUNT_NAME"]
     account_key = adf_config["AZ_STORAGE_ACCOUNT_KEY"]
 
@@ -212,20 +224,22 @@ def _poll_adf_until(adf_client, az_resource_group, adf_name, pipeline_run_id,
 
 @pytest.fixture(scope="session")
 def adf_storage_event_triggered_pipeline_run(adf_client, adf_config, blob_service_client):
-    """Factory function for triggering an storage-event-triggered ADF Pipeline run by uploading target trigger file to storage account, and polls for results."""
+    """Factory function for triggering an storage-event-triggered ADF Pipeline run
+    by uploading target trigger file to storage account, and polls for results.
+    """
     # Because ADF pipeline can be expensive to execute, you may want to cache pipeline_runs.
-    # Cache pipeline runs are identified by pipeline_name and cached_run_name    
+    # Cache pipeline runs are identified by pipeline_name and cached_run_name
     cached_pipeline_runs = {}
-    
-    def make_adf_storage_event_triggered_pipeline_run(pipeline_name, 
-                                                      trigger_name, 
-                                                      trigger_file_path, 
-                                                      container_name, 
-                                                      local_trigger_file_path="", 
-                                                      blob_event_type=BlobEventType.BLOB_CREATED, 
-                                                      cached_run_name: str = "", 
+
+    def make_adf_storage_event_triggered_pipeline_run(pipeline_name,
+                                                      trigger_name,
+                                                      trigger_file_path,
+                                                      container_name,
+                                                      local_trigger_file_path="",
+                                                      blob_event_type=BlobEventType.BLOB_CREATED,
+                                                      cached_run_name: str = "",
                                                       rerun=False):
-        
+
         # Check if pipeline run was already previous executed, simply return cached run
         if (cached_run_name != ""
             and not rerun
@@ -234,32 +248,37 @@ def adf_storage_event_triggered_pipeline_run(adf_client, adf_config, blob_servic
             LOG.info("""Previously executed cached pipeline run found for pipeline: {pipeline}
                      with run_name: {run_name}""".format(pipeline=pipeline_name, run_name=cached_run_name))
             return cached_pipeline_runs[pipeline_name][cached_run_name]
-                
+
         az_resource_group = adf_config["AZ_RESOURCE_GROUP_NAME"]
         adf_name = adf_config["AZ_DATAFACTORY_NAME"]
-        
+
         # Upload/delete event trigger file to/from target storage account, depends on given blob event type
         if blob_event_type == BlobEventType.BLOB_CREATED:
-            blob_properties = _upload_event_trigger_file(blob_service_client, trigger_file_path, container_name, local_trigger_file_path)
+            blob_properties = _upload_event_trigger_file(blob_service_client,
+                                                         trigger_file_path,
+                                                         container_name,
+                                                         local_trigger_file_path)
         elif blob_event_type == BlobEventType.BLOB_DELETED:
-            blob_properties = _delete_event_trigger_file(blob_service_client, trigger_file_path, container_name)
-            
+            blob_properties = _delete_event_trigger_file(blob_service_client,
+                                                         trigger_file_path,
+                                                         container_name)
+
         # Fetch triggered pipeline run id from trigger run
-        triggered_pipeline_run_id = _get_triggered_pipeline_run_id(adf_client, 
-                                                                   az_resource_group, 
-                                                                   adf_name, 
-                                                                   pipeline_name, 
-                                                                   trigger_name, 
-                                                                   blob_event_type, 
-                                                                   blob_properties["last_modified"], 
+        triggered_pipeline_run_id = _get_triggered_pipeline_run_id(adf_client,
+                                                                   az_resource_group,
+                                                                   adf_name,
+                                                                   pipeline_name,
+                                                                   trigger_name,
+                                                                   blob_event_type,
+                                                                   blob_properties["last_modified"],
                                                                    blob_properties["etag"])
-        
-        pipeline_run = _poll_adf_until(adf_client, 
-                                       az_resource_group, 
-                                       adf_name, 
-                                       triggered_pipeline_run_id, 
+
+        pipeline_run = _poll_adf_until(adf_client,
+                                       az_resource_group,
+                                       adf_name,
+                                       triggered_pipeline_run_id,
                                        poll_interval=int(adf_config["AZ_DATAFACTORY_POLL_INTERVAL_SEC"]))
-        
+
         # Store run in cache, if run_name is specified
         if cached_run_name != "":
             LOG.info("Caching pipeline: {pipeline} with run_name: {run_name}".format(
@@ -267,7 +286,7 @@ def adf_storage_event_triggered_pipeline_run(adf_client, adf_config, blob_servic
             cached_pipeline_runs[pipeline_name] = {}
             cached_pipeline_runs[pipeline_name][cached_run_name] = pipeline_run
         return pipeline_run
-        
+
     return make_adf_storage_event_triggered_pipeline_run
 
 
@@ -288,7 +307,7 @@ def _upload_event_trigger_file(blob_service_client, trigger_file_path, container
     # Upload the event trigger file to starage account
     with open(local_trigger_file_path, "rb") as data:
         blob_client.upload_blob(data, overwrite=True)
-    
+
     # Fetch eTag and last_modiefied from the uploaded event trigger file
     etag = blob_client.get_blob_properties().etag
     last_modified = blob_client.get_blob_properties().last_modified
@@ -296,14 +315,14 @@ def _upload_event_trigger_file(blob_service_client, trigger_file_path, container
         "etag": etag.replace("\"", ""),
         "last_modified": last_modified
     }
-    
+
     return blob_properties
 
 
 def _delete_event_trigger_file(blob_service_client, trigger_file_path, container_name):
     """Helper function that delete event trigger file from target container of storage account.
-    Warning: if target deleting file is not there, BlobNotFound exception will be raised.
-    
+    Warning! If target deleting file is not there, BlobNotFound exception will be raised.
+
     Args:
         blob_service_client (BlobServiceClient): Azure Storage Account service client
         trigger_file_path (str): Path of trigger file in storage account container
@@ -321,31 +340,47 @@ def _delete_event_trigger_file(blob_service_client, trigger_file_path, container
         "etag": "",
         "last_modified": deleted_time
     }
-    
+
     return blob_properties
 
 
-def _get_triggered_pipeline_run_id(adf_client, az_resource_group, adf_name, pipeline_name, trigger_name, blob_event_type, trigger_file_last_modified_time, trigger_file_etag, poll_interval=5):
-    """Helper functioin to get triggered pipeline run id by looking for expected trigger-run with last moified time and eTag of target event trigger file.
-    Warning! TimeoutError exception may be raised if it still fails to find the expected trigger-run after the configured max time.
+def _get_triggered_pipeline_run_id(adf_client,
+                                   az_resource_group,
+                                   adf_name,
+                                   pipeline_name,
+                                   trigger_name,
+                                   blob_event_type,
+                                   trigger_file_last_modified_time,
+                                   trigger_file_etag,
+                                   poll_interval=5):
+    """Helper functioin to get triggered pipeline run id by looking for expected trigger-run with
+    last modified time and eTag of target event trigger file.
+    Warning! TimeoutError exception may be raised if it still fails to find the expected trigger-run
+    after the configured max time.
     """
     max_iterations = int(FETCHING_TRIGGER_RUNS_MAX_TIME_IN_SECONDS / poll_interval)
     iteration = 0
     found_trigger_run = False
     triggered_pipeline_run_id = ""
-    while (found_trigger_run == False):
-        LOG.info("Polling trigger-run by trigger name {}, last modified time and eTag of target trigger file.".format(trigger_name))
-        
+    while (found_trigger_run is False):
+        LOG.info("Polling trigger-run by trigger name {}, last modified time and eTag "
+                 "of target trigger file.".format(trigger_name))
+
         if not found_trigger_run:
-            run_query_filter = RunQueryFilter(operand=RunQueryFilterOperand.TRIGGER_NAME, operator=RunQueryFilterOperator.EQUALS, values=[trigger_name])
-            run_query_order_by = RunQueryOrderBy(order_by=RunQueryOrderByField.TRIGGER_RUN_TIMESTAMP, order=RunQueryOrder.DESC)
-            filter_params = RunFilterParameters(last_updated_after=trigger_file_last_modified_time, 
-                                                last_updated_before=trigger_file_last_modified_time + timedelta(minutes = FETCHING_TRIGGER_RUNS_TIME_RANGE_IN_MINUTES),
+            run_query_filter = RunQueryFilter(operand=RunQueryFilterOperand.TRIGGER_NAME,
+                                              operator=RunQueryFilterOperator.EQUALS,
+                                              values=[trigger_name])
+            run_query_order_by = RunQueryOrderBy(order_by=RunQueryOrderByField.TRIGGER_RUN_TIMESTAMP,
+                                                 order=RunQueryOrder.DESC)
+            filter_params = RunFilterParameters(last_updated_after=trigger_file_last_modified_time,
+                                                last_updated_before=trigger_file_last_modified_time + timedelta(
+                                                    minutes=FETCHING_TRIGGER_RUNS_TIME_RANGE_IN_MINUTES
+                                                    ),
                                                 filters=[run_query_filter],
                                                 order_by=[run_query_order_by])
-            
-            trigger_runs_query_response = adf_client.trigger_runs.query_by_factory(az_resource_group, 
-                                                                                   adf_name, 
+
+            trigger_runs_query_response = adf_client.trigger_runs.query_by_factory(az_resource_group,
+                                                                                   adf_name,
                                                                                    filter_params)
             trigger_runs = trigger_runs_query_response.value
             if (len(trigger_runs) > 0):
@@ -354,16 +389,26 @@ def _get_triggered_pipeline_run_id(adf_client, az_resource_group, adf_name, pipe
                     event_payload_json = json.loads(event_payload.replace("\r\n", ""))
                     etag = event_payload_json["data"]["eTag"]
                     api = event_payload_json["data"]["api"]
-                    
-                    if ((blob_event_type == BlobEventType.BLOB_CREATED and api == TriggerRunDataAPIAction.PUT_BLOB and etag == trigger_file_etag) 
-                        or (blob_event_type == BlobEventType.BLOB_DELETED and api == TriggerRunDataAPIAction.DELETE_BLOB)):
+
+                    if ((blob_event_type == BlobEventType.BLOB_CREATED
+                         and api == TriggerRunDataAPIAction.PUT_BLOB
+                         and etag == trigger_file_etag)
+                        or
+                        (blob_event_type == BlobEventType.BLOB_DELETED
+                         and api == TriggerRunDataAPIAction.DELETE_BLOB)):
                         triggered_pipeline_run_id = trigger_run.triggered_pipelines.get(pipeline_name)
                         found_trigger_run = True
+                        LOG.info("Found expected triggered pipeline with run id {}".format(triggered_pipeline_run_id))
                         break
-                        
+                    else:
+                        LOG.info("Not found expected triggered pipeline run, will try again in next poll.")
+            else:
+                LOG.info("Not found any trigger run in this query, will try again in next poll.")
+
         iteration += 1
         if iteration > max_iterations:
-            raise TimeoutError("Time out when fetching expected trigger-run, please check relevant trigger configurations!")
-        
+            raise TimeoutError("Time out when fetching expected trigger-run, "
+                               "please check relevant trigger configurations!")
+
         time.sleep(poll_interval)
     return triggered_pipeline_run_id
