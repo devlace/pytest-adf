@@ -1,5 +1,5 @@
 {
-    "name": "Ls_blobstor_01",
+    "name": "blob_storage",
     "type": "Microsoft.DataFactory/factories/linkedservices",
     "properties": {
         "annotations": [],
